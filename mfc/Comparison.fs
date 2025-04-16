@@ -44,19 +44,22 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
                     Console.Error.WriteLine $"Pedido buffer 2 extra {filePath1} - {blockNumber}"
                     buffer2 <- arrayPool.RentArray ()
 
-                let stream1 = new FileStream(filePath1, FileMode.Open, FileAccess.Read)
-                let stream2 = new FileStream(filePath2, FileMode.Open, FileAccess.Read)
+                let stream1 = new FileStream (filePath1, FileMode.Open, FileAccess.Read, FileShare.Read)
+                let stream2 = new FileStream (filePath2, FileMode.Open, FileAccess.Read, FileShare.Read)
                 let offset = blockSize * (blockNumber |> int64)
 
                 ct.ThrowIfCancellationRequested()
                 stream1.Seek (offset, SeekOrigin.Begin) |> ignore
                 stream2.Seek (offset, SeekOrigin.Begin) |> ignore
 
-                let! _ = stream1.ReadAsync(buffer1, 0, (int blockSize), ct)
-                let! _ = stream2.ReadAsync(buffer2, 0, (int blockSize), ct)
+                let! bytesRead1 = stream1.ReadAsync (buffer1, 0, (int blockSize), ct)
+                let! bytesRead2 = stream2.ReadAsync (buffer2, 0, (int blockSize), ct)
 
-                let span1 = ReadOnlySpan<byte>(buffer1)
-                let span2 = ReadOnlySpan<byte>(buffer2)
+                if bytesRead1 <> bytesRead2 then
+                    failwith $"Error de lectura en {filePath1} y {filePath2} - {blockNumber}: longitudes diferentes."
+
+                let span1 = ReadOnlySpan<byte>(buffer1, 0, bytesRead1)
+                let span2 = ReadOnlySpan<byte>(buffer2, 0, bytesRead2)
 
                 ct.ThrowIfCancellationRequested()
                 if span1.SequenceEqual(span2)
