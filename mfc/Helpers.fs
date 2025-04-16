@@ -95,11 +95,13 @@ let showInfo(errors: Error seq) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let showDebugInfo (options: ArgumentOptions) (stopwatch: Stopwatch) =
+let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFolders: int) (stopwatch: Stopwatch) =
 
     Console.WriteLine ""
     Console.WriteLine $"Tamaño de bloque: {options.BlockSize:N0} Bytes"
     Console.WriteLine $"Tareas: {options.SemaphoreSize}"
+    Console.WriteLine $"Archivos procesados: {processedFiles:N0}"
+    Console.WriteLine $"Carpetas procesadas: {processedFolders:N0}"
     Console.WriteLine $"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds:N0} ms"
     Console.WriteLine ""
 

@@ -48,14 +48,20 @@ let compareTwoFiles (file1: string) (file2: string) (blockSize: int64)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let processFilesTry (folderPath: string) (processFun: string -> unit) =
+let processFilesTry (folderPath: string) (processFun: string -> unit) : int * int =
 
-    let rec processFilesRec carpeta =
-        Directory.GetFiles carpeta |> Array.iter processFun
+    let rec processFilesRec folder (fileAcc, folderAcc) =
 
-        Directory.GetDirectories carpeta |> Array.iter processFilesRec
+        let files = Directory.GetFiles folder
+        files |> Array.iter processFun
 
-    processFilesRec folderPath
+        let folders = Directory.GetDirectories folder
+
+        folders
+        |> Array.fold (fun (fileAcc, folderAcc) dir ->
+            processFilesRec dir (fileAcc, folderAcc)) (fileAcc + files.Length, folderAcc + folders.Length)
+
+    processFilesRec folderPath (0, 0)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------

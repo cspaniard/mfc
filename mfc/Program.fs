@@ -16,11 +16,11 @@ try
     match parserResult with
     | Parsed as parsed ->
         let stopwatch = Stopwatch.StartNew()
-        launchProcessing parsed.Value                               // Lanza el proceso.
+        let processedFiles, processedFolders = launchProcessing parsed.Value                               // Lanza el proceso.
         stopwatch.Stop()
 
         if parsed.Value.Debug then
-            showDebugInfo parsed.Value stopwatch
+            showDebugInfo parsed.Value processedFiles processedFolders stopwatch
     | NotParsed as notParsed -> showInfo notParsed.Errors
 with
 | :? AggregateException as aex ->
