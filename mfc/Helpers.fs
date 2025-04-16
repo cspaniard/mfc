@@ -1,7 +1,7 @@
 module Helpers
 
 open System
-open System.Collections.Generic
+open System.Collections.Concurrent
 open System.Diagnostics
 open System.Reflection
 open System.Runtime.InteropServices
@@ -11,20 +11,15 @@ open Options
 // ---------------------------------------------------------------------------------------------------------------------
 type ArrayPoolLight(elementSize: int) =
 
-    let customPool = Queue<byte[]>()
+    let customPool = ConcurrentQueue<byte[]>()
 
     member this.RentArray () =
-        lock customPool (fun () ->
-            if customPool.Count > 0 then
-                customPool.Dequeue()                                    // Toma un array disponible del pool
-            else
-                Array.zeroCreate elementSize                            // Crea un array nuevo si no hay disponible
-        )
+        match customPool.TryDequeue() with
+        | true, array -> array                                        // Toma un array disponible del pool
+        | false, _ -> Array.zeroCreate elementSize                    // Crea un array nuevo si no hay disponible
 
     member this.ReturnArray (array: byte[]) =
-        lock customPool (fun () ->
-            customPool.Enqueue(array)                                   // Devuelve el array al pool
-        )
+        customPool.Enqueue(array)                                     // Devuelve el array al pool
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
