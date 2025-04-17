@@ -129,7 +129,7 @@ let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (bloc
 
 // ---------------------------------------------------------------------------------------------------------------------
 let compareTwoFiles (file1: string) (file2: string) (blockSize: int64)
-                    (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) =
+                    (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FilesCompareStatus =
 
     let fileSize1 = (FileInfo file1).Length
 

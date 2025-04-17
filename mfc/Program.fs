@@ -25,7 +25,11 @@ try
     | NotParsed as notParsed -> showInfo notParsed.Errors
 with
 | :? AggregateException as aex ->
+    Console.WriteLine ""
+
     aex.InnerExceptions
     |> Seq.iter (fun ex -> Console.Error.WriteLine $"Error: {ex.Message}")
+
+    Console.WriteLine ""
 | ex ->
     Console.Error.WriteLine $"Error: {ex.Message} - {ex.StackTrace}"

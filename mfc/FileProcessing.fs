@@ -36,8 +36,8 @@ let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
     let writeFilesAreEqual (file1: string) (file2: string) =
         Console.WriteLine $"{file1}{separator}{file2}{separator}IGUALES"
 
-    let writeExceptionError (file1: string) (file2: string) (ex : Exception) =
-        Console.Error.WriteLine $"Error al comparar los archivos. {file1} - {file2} - {ex.Message} - {ex.StackTrace}"
+    let raiseExceptionError (file1: string) (file2: string) (ex : Exception) =
+        failwith $"Error al comparar los archivos. {file1} - {file2} - {ex.Message} - {ex.StackTrace}"
     // -----------------------------------------------------------------------------------------------------------------
 
     let relativeFileName = masterFileName.Replace(masterPath, "").Remove(0, 1)
@@ -48,7 +48,7 @@ let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
        | FilesAreEqual -> writeFilesAreEqual masterFileName backupFileName
        | FilesAreDifferent -> writeFilesAreDifferent masterFileName backupFileName
        | FilesWereCancelled -> ()
-       | FilesCompareException ex -> writeExceptionError masterFileName backupFileName ex
+       | FilesCompareException ex -> raiseExceptionError masterFileName backupFileName ex
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ let checkPathsRelationsshipsTry (path1: string) (path2: string) =
     if normalizedPath1.StartsWith(normalizedPath2 + Path.DirectorySeparatorChar.ToString()) ||
        normalizedPath2.StartsWith(normalizedPath1 + Path.DirectorySeparatorChar.ToString())
     then
-        failwith "Las sendas especificadas comparten raíz."
+        raise (AggregateException(Exception("Las sendas especificadas comparten raíz.")))
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ let checkPathsAreEqualTry (path1: string) (path2: string) =
     let normalizedPath2 = Path.GetFullPath(path2).TrimEnd(Path.DirectorySeparatorChar)
 
     if normalizedPath1 = normalizedPath2 then
-        failwith "Las sendas especificadas son iguales."
+        raise (AggregateException(Exception("Las sendas especificadas son iguales.")))
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
