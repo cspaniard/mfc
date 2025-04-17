@@ -7,23 +7,23 @@ open System.Threading.Tasks
 open Helpers
 
 // ---------------------------------------------------------------------------------------------------------------------
-type BlockCompareStatus =
-    | BlockEqual
-    | BlockDifferent
-    | BlockCancelled
-    | BlockExceptionError of Exception
+type BlocksCompareStatus =
+    | BlocksAreEqual
+    | BlocksAreDifferent
+    | BlocksWereCancelled
+    | BlocksCompareException of Exception
 
-type FileCompareStatus =
-    | FileEqual
-    | FileDifferent
-    | FileCancelled
-    | FileExceptionError of Exception
+type FilesCompareStatus =
+    | FilesAreEqual
+    | FilesAreDifferent
+    | FilesWereCancelled
+    | FilesCompareException of Exception
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
 let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64) (ct: CancellationToken)
                       (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim)
-                      (blockNumber: int) : Task<BlockCompareStatus> =
+                      (blockNumber: int) : Task<BlocksCompareStatus> =
 
     task {
         let mutable buffer1 = Unchecked.defaultof<byte[]>
@@ -64,48 +64,82 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
 
                 ct.ThrowIfCancellationRequested()
                 if span1.SequenceEqual(span2)
-                then return BlockEqual
-                else return BlockDifferent
+                then return BlocksAreEqual
+                else return BlocksAreDifferent
             finally
                 arrayPool.ReturnArray buffer1
                 arrayPool.ReturnArray buffer2
 
                 semaphore.Release() |> ignore
         with
-        | :? OperationCanceledException -> return BlockCancelled
-        | ex -> return BlockExceptionError ex
+        | :? OperationCanceledException -> return BlocksWereCancelled
+        | ex -> return BlocksCompareException ex
     }
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let compareAllBlocksAsync (tasks: Task<BlockCompareStatus> array) (cts: CancellationTokenSource) =
+let compareAllBlocksAsync (tasks: Task<BlocksCompareStatus> array) (cts: CancellationTokenSource) =
 
-    let rec processTasks (remainingTasks: Task<BlockCompareStatus> array) (tasksCompleted: int) =
+    let rec processTasks (remainingTasks: Task<BlocksCompareStatus> array) (tasksCompleted: int) =
         task {
             if Array.isEmpty remainingTasks || tasksCompleted >= tasks.Length then
-                return FileEqual
+                return FilesAreEqual
             else
                 try
                     let! completedTask = Task.WhenAny remainingTasks
                     let updatedRemainingTasks = remainingTasks |> Array.filter ((<>) completedTask)
 
                     match completedTask.Result with
-                    | BlockEqual ->
+                    | BlocksAreEqual ->
                         return! processTasks updatedRemainingTasks (tasksCompleted + 1)
-                    | BlockDifferent
-                    | BlockCancelled ->
+                    | BlocksAreDifferent
+                    | BlocksWereCancelled ->
                         cts.Cancel()
-                        return FileDifferent
-                    | BlockExceptionError ex ->
+                        return FilesAreDifferent
+                    | BlocksCompareException ex ->
                         cts.Cancel()
-                        return FileExceptionError ex
+                        return FilesCompareException ex
                 with
                 | ex ->
                     cts.Cancel()
-                    return FileExceptionError ex
+                    return FilesCompareException ex
         }
 
     task {
         return! processTasks tasks 0
     }
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
+let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (blockSize: int64)
+                         (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FilesCompareStatus =
+
+    let cts = new CancellationTokenSource()
+
+    let blockMaxIndex =
+        if fileSize % blockSize = 0L then
+            (fileSize / blockSize) - 1L
+        else
+            fileSize / blockSize
+        |> int
+
+    let blockCompareTasks =
+        [| for blockIndex in 0..blockMaxIndex do
+               compareBlockAsync file1 file2 blockSize cts.Token arrayPool semaphore blockIndex |]
+
+    (compareAllBlocksAsync blockCompareTasks cts).GetAwaiter().GetResult()
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
+let compareTwoFiles (file1: string) (file2: string) (blockSize: int64)
+                    (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) =
+
+    let fileSize1 = (FileInfo file1).Length
+
+    if file2 |> File.Exists = false then
+        FilesAreDifferent
+    elif fileSize1 <> (FileInfo file2).Length then
+        FilesAreDifferent
+    else
+        compareFilesSameSize file1 file2 fileSize1 blockSize arrayPool semaphore
 // ---------------------------------------------------------------------------------------------------------------------
