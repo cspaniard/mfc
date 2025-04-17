@@ -6,6 +6,7 @@ open System.Threading
 open System.Threading.Tasks
 open Helpers
 
+// ---------------------------------------------------------------------------------------------------------------------
 type BlockCompareStatus =
     | BlockEqual
     | BlockDifferent
@@ -17,7 +18,7 @@ type FileCompareStatus =
     | FileDifferent
     | FileCancelled
     | FileExceptionError of Exception
-
+// ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
 let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64) (ct: CancellationToken)
@@ -108,75 +109,3 @@ let compareAllBlocksAsync (tasks: Task<BlockCompareStatus> array) (cts: Cancella
         return! processTasks tasks 0
     }
 // ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-// Guardamos como posible referencia.
-// ---------------------------------------------------------------------------------------------------------------------
-// let compareBlocksAsync (tasks : Task<BlockCompareStatus> array) (cts : CancellationTokenSource) =
-//     let mutable tasksCompleted = 0
-//     let mutable exitLoop = false
-//     let mutable blockCompareStatus = Unchecked.defaultof<BlockCompareStatus>
-//     let mutable remainingTasks = tasks |> List.ofArray
-//
-//     task {
-//         while not exitLoop && tasksCompleted < tasks.Length do
-//             try
-//                 let! completedTask = Task.WhenAny remainingTasks
-//                 remainingTasks <- remainingTasks |> List.filter ((<>) completedTask)
-//                 tasksCompleted <- tasksCompleted + 1
-//
-//                 blockCompareStatus <- completedTask.Result
-//
-//                 match blockCompareStatus with
-//                 | BlockEqual -> ()
-//                 | _ ->
-//                     cts.Cancel()
-//                     exitLoop <- true
-//             with
-//             | ex ->
-//                 cts.Cancel()
-//                 blockCompareStatus <- BlockExceptionError ex
-//                 exitLoop <- true
-//
-//         return
-//             match blockCompareStatus with
-//             | BlockEqual -> FileEqual
-//             | BlockDifferent -> FileDifferent
-//             | BlockCancelled -> FileCancelled
-//             | BlockExceptionError ex -> FileExceptionError ex
-//     }
-//
-// let compareBlocksAsync3 (tasks : Task<BlockCompareStatus> array) (cts : CancellationTokenSource) =
-//     let rec processRemainingTasks (remainingTasks : Task<BlockCompareStatus> array) tasksCompleted lastBlockStatus =
-//         task {
-//             if tasksCompleted = tasks.Length then
-//                 return
-//                     match lastBlockStatus with
-//                     | BlockEqual -> FileEqual
-//                     | BlockDifferent -> FileDifferent
-//                     | BlockCancelled -> FileCancelled
-//                     | BlockExceptionError ex -> FileExceptionError ex
-//             else
-//                 try
-//                     let! completedTask = Task.WhenAny remainingTasks
-//                     let newRemainingTasks = remainingTasks |> Array.filter ((<>) completedTask)
-//                     let blockStatus = completedTask.Result
-//
-//                     match blockStatus with
-//                     | BlockEqual ->
-//                         return! processRemainingTasks newRemainingTasks (tasksCompleted + 1) blockStatus
-//                     | _ ->
-//                         cts.Cancel()
-//                         return
-//                             match blockStatus with
-//                             | BlockDifferent -> FileDifferent
-//                             | BlockCancelled -> FileCancelled
-//                             | BlockExceptionError ex -> FileExceptionError ex
-//                             | _ -> FileEqual // Este caso nunca debería ocurrir
-//                 with
-//                 | ex ->
-//                     cts.Cancel()
-//                     return FileExceptionError ex
-//         }
-//
-//     processRemainingTasks tasks 0 BlockEqual

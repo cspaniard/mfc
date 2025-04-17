@@ -14,11 +14,11 @@ type ArrayPoolLight(elementSize: int) =
 
     member this.RentArray () =
         match customPool.TryDequeue() with
-        | true, array -> array                                        // Toma un array disponible del pool
-        | false, _ -> Array.zeroCreate elementSize                    // Crea un array nuevo si no hay disponible
+        | true, array -> array
+        | false, _ -> Array.zeroCreate elementSize
 
     member this.ReturnArray (array: byte[]) =
-        customPool.Enqueue(array)                                     // Devuelve el array al pool
+        customPool.Enqueue(array)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -85,10 +85,4 @@ let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFol
     Console.WriteLine $"Carpetas procesadas: {processedFolders:N0}"
     Console.WriteLine $"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds:N0} ms"
     Console.WriteLine ""
-
-    // Mostrar información sobre el uso de memoria
-    // let currentProcess = Process.GetCurrentProcess();
-    // Console.WriteLine($"Memoria física utilizada: {currentProcess.WorkingSet64 / 1024L / 1024L:N0} MiB");
-    // Console.WriteLine($"Memoria privada utilizada: {currentProcess.PrivateMemorySize64 / 1024L / 1024L:N0} MiB");
-    // Console.WriteLine($"Memoria virtual utilizada: {currentProcess.VirtualMemorySize64 / 1024L / 1024L:N0} MiB");
 // ---------------------------------------------------------------------------------------------------------------------
