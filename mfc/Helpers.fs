@@ -4,7 +4,6 @@ open System
 open System.Collections.Concurrent
 open System.Diagnostics
 open System.Reflection
-open System.Runtime.InteropServices
 open CommandLine
 open Options
 
@@ -29,19 +28,6 @@ let (|Parsed|NotParsed|) (parserResult : ParserResult<_>) =
     | :? Parsed<_> -> Parsed
     | :? NotParsed<_> -> NotParsed
     | _ -> failwith "No debiéramos llegar aquí."
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------
-let (|LinuxOs|WindowsOs|MacOs|OtherOs|) _ =
-
-    let knownOsList =
-        [ (OSPlatform.Linux, LinuxOs)
-          (OSPlatform.Windows, WindowsOs)
-          (OSPlatform.OSX, MacOs) ]
-
-    match knownOsList |> List.tryFind (fst >> RuntimeInformation.IsOSPlatform) with
-    | Some (_, os) -> os
-    | None -> OtherOs
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
