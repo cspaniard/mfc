@@ -116,16 +116,13 @@ let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (bloc
 
     let cts = new CancellationTokenSource()
 
-    let blockMaxIndex =
-        if fileSize % blockSize = 0L then
-            (fileSize / blockSize) - 1L
-        else
-            fileSize / blockSize
-        |> int
+    let blockCount = Math.Ceiling((decimal fileSize) / (decimal blockSize)) |> int
 
     let blockCompareTasks =
-        [| for blockIndex in 0..blockMaxIndex do
-               compareBlockAsync file1 file2 blockSize cts.Token arrayPool semaphore blockIndex |]
+        [|
+            for blockIndex in 0..blockCount - 1 do
+                compareBlockAsync file1 file2 blockSize cts.Token arrayPool semaphore blockIndex
+        |]
 
     (compareAllBlocksAsync blockCompareTasks cts).GetAwaiter().GetResult()
 // ---------------------------------------------------------------------------------------------------------------------
