@@ -19,13 +19,15 @@ let processFilesTry (folderPath: string)
 
         let files = Directory.GetFiles folder
 
+        let processResults = files |> Array.map processFun
+
         let newExitCode =
-            files
-            |> Array.map processFun
-            |> Array.contains FilesAreDifferent
-            |> function
-               | true -> ExitCode.DiferencesFound
-               | false -> exitCode
+            if exitCode = ExitCode.DiferencesNotFound then
+                if processResults |> Array.contains FilesAreDifferent
+                then ExitCode.DiferencesFound
+                else exitCode
+            else
+                exitCode
 
         let folders = Directory.GetDirectories folder
 
