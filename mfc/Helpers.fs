@@ -9,7 +9,7 @@ open Domain
 open Options
 
 // ---------------------------------------------------------------------------------------------------------------------
-type ArrayPoolLight(elementSize: int) =
+type ArrayPoolLight (elementSize: int) =
 
     let customPool = ConcurrentQueue<byte[]>()
 
@@ -32,7 +32,7 @@ let (|Parsed|NotParsed|) (parserResult : ParserResult<_>) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let showInfo(errors: Error seq) =
+let processErrors (errors: Error seq) =
 
     let processErrors (errors: Error seq) =
 
@@ -76,12 +76,15 @@ let showInfo(errors: Error seq) =
     showVersionHeader ()
 
     match Seq.head errors with
-    | :? HelpRequestedError -> showHelp ()
-    | :? VersionRequestedError -> ()
+    | :? HelpRequestedError ->
+        showHelp ()
+        ExitCode.NoErrorsFound
+    | :? VersionRequestedError -> ExitCode.NoErrorsFound
     | _ ->
         Console.WriteLine "ERRORES:"
         processErrors errors
         showHelp ()
+        ExitCode.ErrorsFound
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------

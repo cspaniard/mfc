@@ -15,6 +15,7 @@ type FilesCompareStatus =
     | FilesCompareException of Exception
 
 type ExitCode =
+    | NoErrorsFound = 0
+    | ErrorsFound = 1
     | DiferencesNotFound = 10
     | DiferencesFound = 11
-    | ErrorsFound = 1

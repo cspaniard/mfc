@@ -14,28 +14,27 @@ let parserResult =
     |> parser.ParseArguments<ArgumentOptions>
 
 try
-    try
-        match parserResult with
-        | Parsed as parsed ->
-            let stopwatch = Stopwatch.StartNew()
-            let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
-            stopwatch.Stop()
+    match parserResult with
+    | Parsed as parsed ->
+        let stopwatch = Stopwatch.StartNew()
+        let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
+        stopwatch.Stop()
 
-            if parsed.Value.Debug then
-                showDebugInfo parsed.Value processedFiles processedFolders stopwatch exitCode
+        if parsed.Value.Debug then
+            showDebugInfo parsed.Value processedFiles processedFolders stopwatch exitCode
 
-            exit (int exitCode)
+        exit (int exitCode)
 
-        | NotParsed as notParsed -> showInfo notParsed.Errors
-    with
-    | :? AggregateException as aex ->
-        Console.Error.WriteLine ""
+    | NotParsed as notParsed -> processErrors notParsed.Errors |> int |> exit
+with
+| :? AggregateException as aex ->
+    Console.Error.WriteLine ""
 
-        aex.InnerExceptions
-        |> Seq.iter (fun ex -> Console.Error.WriteLine $"Error: {ex.Message}")
+    aex.InnerExceptions
+    |> Seq.iter (fun ex -> Console.Error.WriteLine $"Error: {ex.Message}")
 
-        Console.Error.WriteLine ""
-    | ex ->
-        Console.Error.WriteLine $"Error: {ex.Message} - {ex.StackTrace}"
-finally
-    exit (int ExitCode.ErrorsFound)
+    Console.Error.WriteLine ""
+| ex ->
+    Console.Error.WriteLine $"Error: {ex.Message} - {ex.StackTrace}"
+
+exit (int ExitCode.ErrorsFound)
