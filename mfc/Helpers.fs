@@ -5,6 +5,7 @@ open System.Collections.Concurrent
 open System.Diagnostics
 open System.Reflection
 open CommandLine
+open Domain
 open Options
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -54,7 +55,7 @@ let showInfo(errors: Error seq) =
         Console.WriteLine " - (c) Motsoft 2025 by David Sanromá"
         Console.WriteLine ""
 
-    let showArgumentsHelp () =
+    let showHelp () =
         Console.WriteLine "OPCIONES:"
         Console.WriteLine ""
         Console.WriteLine ("    {0,-30}Separador de campos. (def: \\t)\n","-s --separador")
@@ -64,19 +65,28 @@ let showInfo(errors: Error seq) =
         Console.WriteLine ("    {0,-30}Senda del directorio principal/origen. (Obligatorio)\n","   master-path")
         Console.WriteLine ("    {0,-30}Senda del directorio de backup. (Obligatorio)\n","   backup-path")
 
+        Console.WriteLine ""
+        Console.WriteLine "NOTAS:"
+        Console.WriteLine "    Se devuelven los siguientes códigos de salida:"
+        Console.WriteLine ("        {0, 2}: Se encontraron errores en el procesado.", int ExitCode.ErrorsFound)
+        Console.WriteLine ("        {0, 2}: No se encontraron diferencias.", int ExitCode.DiferencesNotFound)
+        Console.WriteLine ("        {0, 2}: Se encontraron diferencias.", int ExitCode.DiferencesFound)
+        Console.WriteLine ""
+
     showVersionHeader ()
 
     match Seq.head errors with
-    | :? HelpRequestedError -> showArgumentsHelp ()
+    | :? HelpRequestedError -> showHelp ()
     | :? VersionRequestedError -> ()
     | _ ->
         Console.WriteLine "ERRORES:"
         processErrors errors
-        showArgumentsHelp ()
+        showHelp ()
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFolders: int) (stopwatch: Stopwatch) =
+let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFolders: int)
+                  (stopwatch: Stopwatch) (exitCode : ExitCode) =
 
     Console.WriteLine ""
     Console.WriteLine $"Tamaño de bloque: {options.BlockSize:N0} Bytes"
@@ -84,5 +94,6 @@ let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFol
     Console.WriteLine $"Archivos procesados: {processedFiles:N0}"
     Console.WriteLine $"Carpetas procesadas: {processedFolders:N0}"
     Console.WriteLine $"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds:N0} ms"
+    Console.WriteLine $"Código de salida: {int exitCode}"
     Console.WriteLine ""
 // ---------------------------------------------------------------------------------------------------------------------

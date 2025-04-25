@@ -3,31 +3,44 @@ module FileProcessing
 open System
 open System.Threading
 open System.IO
+open Domain
 open Comparison
 open Helpers
 open Options
 
-// ---------------------------------------------------------------------------------------------------------------------
-let processFilesTry (folderPath: string) (processFun: string -> unit) : int * int =
+type FileCount = int
+type FolderCount = int
 
-    let rec processFilesRec folder (fileAcc, folderAcc) =
+// ---------------------------------------------------------------------------------------------------------------------
+let processFilesTry (folderPath: string)
+                    (processFun: string -> FilesCompareStatus) : FileCount * FolderCount * ExitCode =
+
+    let rec processFilesRec folder (fileAcc, folderAcc, exitCode) =
 
         let files = Directory.GetFiles folder
-        files |> Array.iter processFun
+
+        let newExitCode =
+            files
+            |> Array.map processFun
+            |> Array.contains FilesAreDifferent
+            |> function
+               | true -> ExitCode.DiferencesFound
+               | false -> exitCode
 
         let folders = Directory.GetDirectories folder
 
         folders
-        |> Array.fold (fun (fileAcc, folderAcc) dir ->
-            processFilesRec dir (fileAcc, folderAcc)) (fileAcc + files.Length, folderAcc + folders.Length)
+        |> Array.fold (fun (fileAcc, folderAcc, exitCode) folder ->
+            processFilesRec folder (fileAcc, folderAcc, exitCode))
+            (fileAcc + files.Length, folderAcc + folders.Length, newExitCode)
 
-    processFilesRec folderPath (0, 0)
+    processFilesRec folderPath (0, 0, ExitCode.DiferencesNotFound)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
 let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
                 (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) (separator: string)
-                (masterFileName: string) =
+                (masterFileName: string) : FilesCompareStatus =
 
     // -----------------------------------------------------------------------------------------------------------------
     let writeFilesAreDifferent (file1: string) (file2: string) =
@@ -44,11 +57,14 @@ let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
     let backupFileName = Path.Combine(lastBackupPath, relativeFileName)
 
     compareTwoFiles masterFileName backupFileName blockSize arrayPool semaphore
-    |> function
+    |> fun fileCompareStatus ->
+       match fileCompareStatus with
        | FilesAreEqual -> writeFilesAreEqual masterFileName backupFileName
        | FilesAreDifferent -> writeFilesAreDifferent masterFileName backupFileName
        | FilesWereCancelled -> ()
        | FilesCompareException ex -> raiseExceptionError masterFileName backupFileName ex
+
+       fileCompareStatus
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------

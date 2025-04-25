@@ -4,21 +4,8 @@ open System
 open System.IO
 open System.Threading
 open System.Threading.Tasks
+open Domain
 open Helpers
-
-// ---------------------------------------------------------------------------------------------------------------------
-type BlocksCompareStatus =
-    | BlocksAreEqual
-    | BlocksAreDifferent
-    | BlocksWereCancelled
-    | BlocksCompareException of Exception
-
-type FilesCompareStatus =
-    | FilesAreEqual
-    | FilesAreDifferent
-    | FilesWereCancelled
-    | FilesCompareException of Exception
-// ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
 let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64) (ct: CancellationToken)

@@ -4,11 +4,12 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net9.0</TargetFramework>
         <RootNamespace>Mfc</RootNamespace>
-        <AssemblyVersion>0.10.10</AssemblyVersion>
+        <AssemblyVersion>0.10.16</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Options.fs" />
+        <Compile Include="Domain.fs" />
         <Compile Include="Helpers.fs" />
         <Compile Include="Comparison.fs" />
         <Compile Include="FileProcessing.fs" />
