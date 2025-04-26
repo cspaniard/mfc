@@ -77,7 +77,7 @@ let checkPathsExistTry (paths: string seq) =
         |]
 
     if exceptions |> Array.isEmpty = false then
-        raise (AggregateException exceptions)
+        raise <| AggregateException exceptions
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,8 @@ let checkPathsRelationshipsTry (path1: string) (path2: string) =
     if normalizedPath1.StartsWith(normalizedPath2 + Path.DirectorySeparatorChar.ToString()) ||
        normalizedPath2.StartsWith(normalizedPath1 + Path.DirectorySeparatorChar.ToString())
     then
-        raise (AggregateException (Exception "Las sendas especificadas comparten raíz."))
+        Exception "Las sendas especificadas comparten raíz." |> AggregateException
+        |> raise
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -99,7 +100,8 @@ let checkPathsAreEqualTry (path1: string) (path2: string) =
     let normalizedPath2 = Path.GetFullPath(path2).TrimEnd(Path.DirectorySeparatorChar)
 
     if normalizedPath1 = normalizedPath2 then
-        raise (AggregateException (Exception "Las sendas especificadas son iguales."))
+        Exception "Las sendas especificadas son iguales." |> AggregateException
+        |> raise
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
