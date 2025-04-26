@@ -32,8 +32,9 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
                     Console.Error.WriteLine $"Pedido buffer 2 extra {filePath1} - {blockNumber}"
                     buffer2 <- arrayPool.RentArray ()
 
-                let stream1 = new FileStream (filePath1, FileMode.Open, FileAccess.Read, FileShare.Read)
-                let stream2 = new FileStream (filePath2, FileMode.Open, FileAccess.Read, FileShare.Read)
+                use stream1 = new FileStream (filePath1, FileMode.Open, FileAccess.Read, FileShare.Read)
+                use stream2 = new FileStream (filePath2, FileMode.Open, FileAccess.Read, FileShare.Read)
+
                 let offset = blockSize * (blockNumber |> int64)
 
                 ct.ThrowIfCancellationRequested()
@@ -100,7 +101,7 @@ let compareAllBlocksAsync (tasks: Task<BlocksCompareStatus> array) (cts: Cancell
 let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (blockSize: int64)
                          (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FilesCompareStatus =
 
-    let cts = new CancellationTokenSource()
+    use cts = new CancellationTokenSource()
 
     let blockCount = Math.Ceiling((decimal fileSize) / (decimal blockSize)) |> int
 

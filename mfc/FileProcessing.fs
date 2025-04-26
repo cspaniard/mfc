@@ -114,7 +114,7 @@ let launchProcessing (options: ArgumentOptions) =
 
     let blockSize = options.BlockSize
     let arrayPool = ArrayPoolLight(blockSize |> int)
-    let semaphore = new SemaphoreSlim(options.SemaphoreSize)
+    use semaphore = new SemaphoreSlim(options.SemaphoreSize)
     let separator = options.Separator
 
     let processFileFun = processFile masterPath backupPath blockSize arrayPool semaphore separator
