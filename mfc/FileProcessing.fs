@@ -8,9 +8,6 @@ open Comparison
 open Helpers
 open Options
 
-type FileCount = int
-type FolderCount = int
-
 // ---------------------------------------------------------------------------------------------------------------------
 let processFilesTry (folderPath: string)
                     (processFun: string -> FilesCompareStatus) : FileCount * FolderCount * ExitCode =

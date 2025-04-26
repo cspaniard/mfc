@@ -19,3 +19,6 @@ type ExitCode =
     | ErrorsFound = 1
     | DiferencesNotFound = 10
     | DiferencesFound = 11
+
+type FileCount = int
+type FolderCount = int
