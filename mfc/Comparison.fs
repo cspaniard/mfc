@@ -53,14 +53,13 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
                 if span1.SequenceEqual(span2)
                 then return BlocksAreEqual
                 else return BlocksAreDifferent
-            finally
-                arrayPool.ReturnArray buffer1
-                arrayPool.ReturnArray buffer2
-
-                semaphore.Release() |> ignore
-        with
-        | :? OperationCanceledException -> return BlocksWereCancelled
-        | ex -> return BlocksCompareException ex
+            with
+            | :? OperationCanceledException -> return BlocksWereCancelled
+            | ex -> return BlocksCompareException ex
+        finally
+            arrayPool.ReturnArray buffer1
+            arrayPool.ReturnArray buffer2
+            semaphore.Release() |> ignore
     }
 // ---------------------------------------------------------------------------------------------------------------------
 
