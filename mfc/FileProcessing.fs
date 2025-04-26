@@ -81,7 +81,7 @@ let checkPathsExistTry (paths: string seq) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let checkPathsRelationsshipsTry (path1: string) (path2: string) =
+let checkPathsRelationshipsTry (path1: string) (path2: string) =
 
     let normalizedPath1 = Path.GetFullPath(path1).TrimEnd(Path.DirectorySeparatorChar)
     let normalizedPath2 = Path.GetFullPath(path2).TrimEnd(Path.DirectorySeparatorChar)
@@ -105,20 +105,19 @@ let checkPathsAreEqualTry (path1: string) (path2: string) =
 // ---------------------------------------------------------------------------------------------------------------------
 let launchProcessing (options: ArgumentOptions) =
 
-        let masterPath = options.MasterPath
-        let backupPath = options.BackupPath
+    let masterPath = options.MasterPath
+    let backupPath = options.BackupPath
 
-        checkPathsExistTry [| masterPath; backupPath |]
+    checkPathsExistTry [| masterPath; backupPath |]
+    checkPathsAreEqualTry masterPath backupPath
+    checkPathsRelationshipsTry masterPath backupPath
 
-        checkPathsAreEqualTry masterPath backupPath
-        checkPathsRelationsshipsTry masterPath backupPath
+    let blockSize = options.BlockSize
+    let arrayPool = ArrayPoolLight(blockSize |> int)
+    let semaphore = new SemaphoreSlim(options.SemaphoreSize)
+    let separator = options.Separator
 
-        let blockSize = options.BlockSize
-        let arrayPool = ArrayPoolLight(blockSize |> int)
-        let semaphore = new SemaphoreSlim(options.SemaphoreSize)
-        let separator = options.Separator
+    let processFileFun = processFile masterPath backupPath blockSize arrayPool semaphore separator
 
-        let processFileFun = processFile masterPath backupPath blockSize arrayPool semaphore separator
-
-        processFilesTry masterPath processFileFun
+    processFilesTry masterPath processFileFun
 // ---------------------------------------------------------------------------------------------------------------------
