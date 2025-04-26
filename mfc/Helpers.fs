@@ -62,6 +62,8 @@ let processErrors (errors: Error seq) =
         Console.WriteLine ("    {0,-30}Tamaño en bytes de cada bloque de lectura. (def: 512000)\n","-b --bloque-tamaño")
         Console.WriteLine ("    {0,-30}Tareas máximas de lectura en paralelo. (def: 10)\n","-t --tareas")
         Console.WriteLine ("    {0,-30}Modo de depuración. (def: false)\n","-d --debug")
+        Console.WriteLine ("    {0,-30}Muestra esta ayuda.\n","   --help")
+        Console.WriteLine ("    {0,-30}Muestra la version.\n","   --version")
         Console.WriteLine ("    {0,-30}Senda del directorio principal/origen. (Obligatorio)\n","   master-path")
         Console.WriteLine ("    {0,-30}Senda del directorio de backup. (Obligatorio)\n","   backup-path")
 
