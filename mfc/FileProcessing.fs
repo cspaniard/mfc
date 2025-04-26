@@ -53,7 +53,7 @@ let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
     // -----------------------------------------------------------------------------------------------------------------
 
     let relativeFileName = masterFileName.Replace(masterPath, "").Remove(0, 1)
-    let backupFileName = Path.Combine(lastBackupPath, relativeFileName)
+    let backupFileName = Path.Combine (lastBackupPath, relativeFileName)
 
     compareTwoFiles masterFileName backupFileName blockSize arrayPool semaphore
     |> fun fileCompareStatus ->
@@ -77,7 +77,7 @@ let checkPathsExistTry (paths: string seq) =
         |]
 
     if exceptions |> Array.isEmpty = false then
-        raise (AggregateException(exceptions))
+        raise (AggregateException exceptions)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ let checkPathsRelationshipsTry (path1: string) (path2: string) =
     if normalizedPath1.StartsWith(normalizedPath2 + Path.DirectorySeparatorChar.ToString()) ||
        normalizedPath2.StartsWith(normalizedPath1 + Path.DirectorySeparatorChar.ToString())
     then
-        raise (AggregateException(Exception("Las sendas especificadas comparten raíz.")))
+        raise (AggregateException (Exception "Las sendas especificadas comparten raíz."))
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ let checkPathsAreEqualTry (path1: string) (path2: string) =
     let normalizedPath2 = Path.GetFullPath(path2).TrimEnd(Path.DirectorySeparatorChar)
 
     if normalizedPath1 = normalizedPath2 then
-        raise (AggregateException(Exception("Las sendas especificadas son iguales.")))
+        raise (AggregateException (Exception "Las sendas especificadas son iguales."))
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -108,13 +108,13 @@ let launchProcessing (options: ArgumentOptions) =
     let masterPath = options.MasterPath
     let backupPath = options.BackupPath
 
-    checkPathsExistTry [| masterPath; backupPath |]
+    checkPathsExistTry [| masterPath ; backupPath |]
     checkPathsAreEqualTry masterPath backupPath
     checkPathsRelationshipsTry masterPath backupPath
 
     let blockSize = options.BlockSize
-    let arrayPool = ArrayPoolLight(blockSize |> int)
-    use semaphore = new SemaphoreSlim(options.SemaphoreSize)
+    let arrayPool = ArrayPoolLight (blockSize |> int)
+    use semaphore = new SemaphoreSlim (options.SemaphoreSize)
     let separator = options.Separator
 
     let processFileFun = processFile masterPath backupPath blockSize arrayPool semaphore separator

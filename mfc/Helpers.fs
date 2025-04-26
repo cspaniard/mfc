@@ -11,15 +11,15 @@ open Options
 // ---------------------------------------------------------------------------------------------------------------------
 type ArrayPoolLight (elementSize: int) =
 
-    let customPool = ConcurrentQueue<byte[]>()
+    let customPool = ConcurrentQueue<byte[]> ()
 
     member this.RentArray () =
-        match customPool.TryDequeue() with
+        match customPool.TryDequeue () with
         | true, array -> array
         | false, _ -> Array.zeroCreate elementSize
 
     member this.ReturnArray (array: byte[]) =
-        customPool.Enqueue(array)
+        customPool.Enqueue array
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -6,19 +6,19 @@ open FileProcessing
 open Helpers
 open Options
 
-let parser = new Parser()
+let parser = new Parser ()
 
 let parserResult =
-    Environment.GetCommandLineArgs()
+    Environment.GetCommandLineArgs ()
     |> Array.tail
     |> parser.ParseArguments<ArgumentOptions>
 
 try
     match parserResult with
     | Parsed as parsed ->
-        let stopwatch = Stopwatch.StartNew()
+        let stopwatch = Stopwatch.StartNew ()
         let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
-        stopwatch.Stop()
+        stopwatch.Stop ()
 
         if parsed.Value.Debug then
             showDebugInfo parsed.Value processedFiles processedFolders stopwatch exitCode

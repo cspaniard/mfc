@@ -18,7 +18,7 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
 
         try
             try
-                do! semaphore.WaitAsync(ct)
+                do! semaphore.WaitAsync ct
 
                 buffer1 <- arrayPool.RentArray ()
 
@@ -37,7 +37,7 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
 
                 let offset = blockSize * (blockNumber |> int64)
 
-                ct.ThrowIfCancellationRequested()
+                ct.ThrowIfCancellationRequested ()
                 stream1.Seek (offset, SeekOrigin.Begin) |> ignore
                 stream2.Seek (offset, SeekOrigin.Begin) |> ignore
 
@@ -47,11 +47,12 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
                 if bytesRead1 <> bytesRead2 then
                     failwith $"Error de lectura en {filePath1} y {filePath2} - {blockNumber}: longitudes diferentes."
 
-                let span1 = ReadOnlySpan<byte>(buffer1, 0, bytesRead1)
-                let span2 = ReadOnlySpan<byte>(buffer2, 0, bytesRead2)
+                let span1 = ReadOnlySpan<byte> (buffer1, 0, bytesRead1)
+                let span2 = ReadOnlySpan<byte> (buffer2, 0, bytesRead2)
 
-                ct.ThrowIfCancellationRequested()
-                if span1.SequenceEqual(span2)
+                ct.ThrowIfCancellationRequested ()
+
+                if span1.SequenceEqual span2
                 then return BlocksAreEqual
                 else return BlocksAreDifferent
             with
@@ -60,7 +61,7 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
         finally
             arrayPool.ReturnArray buffer1
             arrayPool.ReturnArray buffer2
-            semaphore.Release() |> ignore
+            semaphore.Release () |> ignore
     }
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -68,6 +69,7 @@ let compareBlockAsync (filePath1: string) (filePath2: string) (blockSize: int64)
 let compareAllBlocksAsync (tasks: Task<BlocksCompareStatus> array) (cts: CancellationTokenSource) =
 
     let rec processTasks (remainingTasks: Task<BlocksCompareStatus> array) (tasksCompleted: int) =
+
         task {
             if Array.isEmpty remainingTasks || tasksCompleted >= tasks.Length then
                 return FilesAreEqual
@@ -81,14 +83,14 @@ let compareAllBlocksAsync (tasks: Task<BlocksCompareStatus> array) (cts: Cancell
                         return! processTasks updatedRemainingTasks (tasksCompleted + 1)
                     | BlocksAreDifferent
                     | BlocksWereCancelled ->
-                        cts.Cancel()
+                        cts.Cancel ()
                         return FilesAreDifferent
                     | BlocksCompareException ex ->
-                        cts.Cancel()
+                        cts.Cancel ()
                         return FilesCompareException ex
                 with
                 | ex ->
-                    cts.Cancel()
+                    cts.Cancel ()
                     return FilesCompareException ex
         }
 
@@ -101,9 +103,9 @@ let compareAllBlocksAsync (tasks: Task<BlocksCompareStatus> array) (cts: Cancell
 let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (blockSize: int64)
                          (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FilesCompareStatus =
 
-    use cts = new CancellationTokenSource()
+    use cts = new CancellationTokenSource ()
 
-    let blockCount = Math.Ceiling((decimal fileSize) / (decimal blockSize)) |> int
+    let blockCount = Math.Ceiling ((decimal fileSize) / (decimal blockSize)) |> int
 
     let blockCompareTasks =
         [|
