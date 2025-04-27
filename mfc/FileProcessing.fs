@@ -9,14 +9,17 @@ open Helpers
 open Options
 
 // ---------------------------------------------------------------------------------------------------------------------
-let processFilesTry (folderPath: string)
+let processFilesTry (folderPath: NormalizedPath)
                     (processFun: string -> FilesCompareStatus) : FileCount * FolderCount * ExitCode =
 
-    let rec processFilesRec folder (fileAcc, folderAcc, exitCode) =
+    let rec processFilesRec (path : NormalizedPath)
+                            (fileAcc: FileCount, folderAcc: FolderCount, exitCode: ExitCode) =
 
-        let files = Directory.GetFiles folder
+        let files = Directory.GetFiles path.Value
 
-        let processResults = files |> Array.map processFun
+        let processResults =
+            files
+            |> Array.map processFun
 
         let newExitCode =
             if exitCode = ExitCode.DiferencesNotFound then
@@ -26,18 +29,18 @@ let processFilesTry (folderPath: string)
             else
                 exitCode
 
-        let folders = Directory.GetDirectories folder
+        let paths = Directory.GetDirectories path.Value
 
-        folders
-        |> Array.fold (fun (fileAcc, folderAcc, exitCode) folder ->
-            processFilesRec folder (fileAcc, folderAcc, exitCode))
-            (fileAcc + files.Length, folderAcc + folders.Length, newExitCode)
+        paths
+        |> Array.fold (fun (fileCount: FileCount, folderCount: FolderCount, exitCode) path ->
+            processFilesRec (NormalizedPath.Create path) (fileCount, folderCount, exitCode))
+            (fileAcc + files.Length, folderAcc + paths.Length, newExitCode)
 
     processFilesRec folderPath (0, 0, ExitCode.DiferencesNotFound)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
+let processFile (masterPath: NormalizedPath) (lastBackupPath: NormalizedPath) (blockSize: int64)
                 (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) (separator: string)
                 (masterFileName: string) : FilesCompareStatus =
 
@@ -52,8 +55,8 @@ let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
         failwith $"Error al comparar los archivos. {file1} - {file2} - {ex.Message} - {ex.StackTrace}"
     // -----------------------------------------------------------------------------------------------------------------
 
-    let relativeFileName = masterFileName.Replace(masterPath, "").Remove(0, 1)
-    let backupFileName = Path.Combine (lastBackupPath, relativeFileName)
+    let relativeFileName = masterFileName.Replace(masterPath.Value, "").Remove(0, 1)
+    let backupFileName = Path.Combine (lastBackupPath.Value, relativeFileName)
 
     compareTwoFiles masterFileName backupFileName blockSize arrayPool semaphore
     |> fun fileCompareStatus ->
@@ -67,13 +70,13 @@ let processFile (masterPath: string) (lastBackupPath: string) (blockSize: int64)
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let checkPathsExistTry (paths: string seq) =
+let checkPathsExistTry (paths: NormalizedPath seq) =
 
     let exceptions =
         [|
             for path in paths do
-                if not (Directory.Exists path) then
-                    Exception $"La senda no existe: {path}"
+                if not (Directory.Exists path.Value) then
+                    Exception $"La senda no existe: {path.Value}"
         |]
 
     if exceptions |> Array.isEmpty = false then
@@ -81,38 +84,38 @@ let checkPathsExistTry (paths: string seq) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let checkPathsRelationshipsTry (path1: string) (path2: string) =
+let checkPathsRelationshipsTry (path1: NormalizedPath) (path2: NormalizedPath) =
 
-    let normalizedPath1 = Path.GetFullPath(path1).TrimEnd(Path.DirectorySeparatorChar)
-    let normalizedPath2 = Path.GetFullPath(path2).TrimEnd(Path.DirectorySeparatorChar)
-
-    if normalizedPath1.StartsWith(normalizedPath2 + Path.DirectorySeparatorChar.ToString()) ||
-       normalizedPath2.StartsWith(normalizedPath1 + Path.DirectorySeparatorChar.ToString())
+    if path1.Value.StartsWith(path2.Value + Path.DirectorySeparatorChar.ToString()) ||
+       path2.Value.StartsWith(path1.Value + Path.DirectorySeparatorChar.ToString())
     then
         Exception "Las sendas especificadas comparten raíz." |> AggregateException
         |> raise
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let checkPathsAreEqualTry (path1: string) (path2: string) =
+let checkPathsAreEqualTry (path1: NormalizedPath) (path2: NormalizedPath) =
 
-    let normalizedPath1 = Path.GetFullPath(path1).TrimEnd(Path.DirectorySeparatorChar)
-    let normalizedPath2 = Path.GetFullPath(path2).TrimEnd(Path.DirectorySeparatorChar)
-
-    if normalizedPath1 = normalizedPath2 then
+    if path1.Value = path2.Value then
         Exception "Las sendas especificadas son iguales." |> AggregateException
         |> raise
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let launchProcessing (options: ArgumentOptions) =
-
-    let masterPath = options.MasterPath
-    let backupPath = options.BackupPath
+let validatePathsTry (masterPath: NormalizedPath) (backupPath: NormalizedPath) =
 
     checkPathsExistTry [| masterPath ; backupPath |]
     checkPathsAreEqualTry masterPath backupPath
     checkPathsRelationshipsTry masterPath backupPath
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
+let launchProcessing (options: ArgumentOptions) =
+
+    let masterPath = NormalizedPath.Create options.MasterPath
+    let backupPath = NormalizedPath.Create options.BackupPath
+
+    validatePathsTry masterPath backupPath
 
     let blockSize = options.BlockSize
     let arrayPool = ArrayPoolLight (blockSize |> int)

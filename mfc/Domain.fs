@@ -1,6 +1,7 @@
 module Domain
 
 open System
+open System.IO
 
 type BlocksCompareStatus =
     | BlocksAreEqual
@@ -22,3 +23,10 @@ type ExitCode =
 
 type FileCount = int
 type FolderCount = int
+
+type NormalizedPath =
+    private NormalizedPath of string
+        static member Create (path: string) =
+            NormalizedPath (Path.GetFullPath(path.Trim()).TrimEnd(Path.DirectorySeparatorChar))
+
+        member this.Value = let (NormalizedPath path) = this in path
