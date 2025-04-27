@@ -42,4 +42,4 @@ match parserResult with
 
     exit (int ExitCode.ErrorsFound)
 
-| NotParsed as notParsed -> processErrors notParsed.Errors |> int |> exit
+| NotParsed as notParsed -> processParsingErrors notParsed.Errors |> int |> exit

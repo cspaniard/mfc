@@ -32,7 +32,7 @@ let (|Parsed|NotParsed|) (parserResult : ParserResult<_>) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
-let processErrors (errors: Error seq) =
+let processParsingErrors (errors: Error seq) =
 
     let processErrors (errors: Error seq) =
 
