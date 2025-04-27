@@ -17,14 +17,16 @@ match parserResult with
 | Parsed as parsed ->
     try
         let stopwatch = Stopwatch.StartNew ()
-        let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
-        stopwatch.Stop ()
+        try
+            let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
+            stopwatch.Stop ()
 
-        if parsed.Value.Debug then
-            showDebugInfo parsed.Value processedFiles processedFolders stopwatch exitCode
+            if parsed.Value.Debug then
+                showDebugInfo parsed.Value processedFiles processedFolders stopwatch exitCode
 
-        exit (int exitCode)
-
+            exit (int exitCode)
+        finally
+            stopwatch.Stop ()
     with
     | :? AggregateException as aex ->
         Console.Error.WriteLine ""
