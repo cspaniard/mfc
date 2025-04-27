@@ -90,6 +90,11 @@ let processErrors (errors: Error seq) =
 // ---------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
+let showExitCode (exitCode: ExitCode) =
+    Console.WriteLine $"Código de salida: {int exitCode}"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
 let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFolders: int)
                   (stopwatch: Stopwatch) (exitCode : ExitCode) =
 
@@ -99,6 +104,6 @@ let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFol
     Console.WriteLine $"Archivos procesados: {processedFiles:N0}"
     Console.WriteLine $"Carpetas procesadas: {processedFolders:N0}"
     Console.WriteLine $"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds:N0} ms"
-    Console.WriteLine $"Código de salida: {int exitCode}"
+    showExitCode exitCode
     Console.WriteLine ""
 // ---------------------------------------------------------------------------------------------------------------------

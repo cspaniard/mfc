@@ -13,9 +13,9 @@ let parserResult =
     |> Array.tail
     |> parser.ParseArguments<ArgumentOptions>
 
-try
-    match parserResult with
-    | Parsed as parsed ->
+match parserResult with
+| Parsed as parsed ->
+    try
         let stopwatch = Stopwatch.StartNew ()
         let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
         stopwatch.Stop ()
@@ -25,16 +25,21 @@ try
 
         exit (int exitCode)
 
-    | NotParsed as notParsed -> processErrors notParsed.Errors |> int |> exit
-with
-| :? AggregateException as aex ->
-    Console.Error.WriteLine ""
+    with
+    | :? AggregateException as aex ->
+        Console.Error.WriteLine ""
 
-    aex.InnerExceptions
-    |> Seq.iter (fun ex -> Console.Error.WriteLine $"Error: {ex.Message}")
+        aex.InnerExceptions
+        |> Seq.iter (fun ex -> Console.Error.WriteLine $"Error: {ex.Message}")
 
-    Console.Error.WriteLine ""
-| ex ->
-    Console.Error.WriteLine $"Error: {ex.Message} - {ex.StackTrace}"
+        Console.Error.WriteLine ""
+    | ex ->
+        Console.Error.WriteLine $"Error: {ex.Message} - {ex.StackTrace}"
 
-exit (int ExitCode.ErrorsFound)
+    if parsed.Value.Debug then
+        showExitCode ExitCode.ErrorsFound
+        Console.WriteLine ""
+
+    exit (int ExitCode.ErrorsFound)
+
+| NotParsed as notParsed -> processErrors notParsed.Errors |> int |> exit
