@@ -9,7 +9,7 @@ type BlocksCompareStatus =
     | BlocksWereCancelled
     | BlocksCompareException of Exception
 
-type FilesCompareStatus =
+type FileCompareStatus =
     | FilesAreEqual
     | FilesAreDifferent
     | FilesWereCancelled

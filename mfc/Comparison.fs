@@ -101,7 +101,7 @@ let compareAllBlocksAsync (tasks: Task<BlocksCompareStatus> array) (cts: Cancell
 
 // ---------------------------------------------------------------------------------------------------------------------
 let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (blockSize: int64)
-                         (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FilesCompareStatus =
+                         (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FileCompareStatus =
 
     use cts = new CancellationTokenSource ()
 
@@ -118,7 +118,7 @@ let compareFilesSameSize (file1: string) (file2: string) (fileSize: int64) (bloc
 
 // ---------------------------------------------------------------------------------------------------------------------
 let compareTwoFiles (file1: string) (file2: string) (blockSize: int64)
-                    (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FilesCompareStatus =
+                    (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) : FileCompareStatus =
 
     let fileSize1 = (FileInfo file1).Length
 

@@ -10,7 +10,7 @@ open Options
 
 // ---------------------------------------------------------------------------------------------------------------------
 let processFilesTry (folderPath: NormalizedPath)
-                    (processFun: string -> FilesCompareStatus) : FileCount * FolderCount * ExitCode =
+                    (processFun: string -> FileCompareStatus) : FileCount * FolderCount * ExitCode =
 
     let rec processFilesRec (path : NormalizedPath)
                             (fileAcc: FileCount, folderAcc: FolderCount, exitCode: ExitCode) =
@@ -42,7 +42,7 @@ let processFilesTry (folderPath: NormalizedPath)
 // ---------------------------------------------------------------------------------------------------------------------
 let processFile (masterPath: NormalizedPath) (lastBackupPath: NormalizedPath) (blockSize: int64)
                 (arrayPool: ArrayPoolLight) (semaphore: SemaphoreSlim) (separator: string)
-                (masterFileName: string) : FilesCompareStatus =
+                (masterFileName: string) : FileCompareStatus =
 
     // -----------------------------------------------------------------------------------------------------------------
     let writeFilesAreDifferent (file1: string) (file2: string) =
