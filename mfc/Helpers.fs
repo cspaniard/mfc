@@ -62,6 +62,8 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ("    {0,-30}Tamaño en bytes de cada bloque de lectura. (def: 512000)\n","-b --bloque-tamaño")
         Console.WriteLine ("    {0,-30}Tareas máximas de lectura en paralelo. (def: 10)\n","-t --tareas")
         Console.WriteLine ("    {0,-30}Modo de depuración. (def: false)\n","-d --debug")
+        Console.WriteLine ("    {0,-30}Fuerza el uso de Unicode (UTF-16LE). (def: false)\n","-U --unicode")
+        Console.WriteLine ("    {0,-30}Fuerza el uso de UTF-8. (def: false) Procesador Intel® Core™2 Quad Q9400\n","-u --utf8")
         Console.WriteLine ("    {0,-30}Muestra esta ayuda.\n","   --help")
         Console.WriteLine ("    {0,-30}Muestra la version.\n","   --version")
         Console.WriteLine ("    {0,-30}Senda del directorio principal/origen. (Obligatorio)\n","   master-path")
@@ -106,4 +108,14 @@ let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFol
     Console.WriteLine $"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds:N0} ms"
     showExitCode exitCode
     Console.WriteLine ""
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
+let setEnconding (options: ArgumentOptions) =
+
+    if options.ForceUnicode then
+        Console.OutputEncoding <- System.Text.Encoding.Unicode
+
+    if options.ForceUtf8 then
+        Console.OutputEncoding <- System.Text.Encoding.UTF8
 // ---------------------------------------------------------------------------------------------------------------------

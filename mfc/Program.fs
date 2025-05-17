@@ -18,6 +18,8 @@ match parserResult with
     try
         let stopwatch = Stopwatch.StartNew ()
         try
+            setEnconding parsed.Value
+
             let processedFiles, processedFolders, exitCode = launchProcessing parsed.Value
             stopwatch.Stop ()
 
