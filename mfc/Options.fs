@@ -15,11 +15,8 @@ type ArgumentOptions = {
     [<Option ('d', "debug", Default = false)>]
     Debug : bool
 
-    [<Option ('U', "unicode", Default = false)>]
-    ForceUnicode : bool
-
-    [<Option ('u', "utf8", Default = false)>]
-    ForceUtf8 : bool
+    [<Option ('e', "encoding", Default = "")>]
+    Encoding : string
 
     [<Value (0, MetaName="master-path", Required = true)>]
     MasterPath : string

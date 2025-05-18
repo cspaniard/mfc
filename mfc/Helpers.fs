@@ -62,8 +62,7 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ("    {0,-30}Tamaño en bytes de cada bloque de lectura. (def: 512000)\n","-b --bloque-tamaño")
         Console.WriteLine ("    {0,-30}Tareas máximas de lectura en paralelo. (def: 10)\n","-t --tareas")
         Console.WriteLine ("    {0,-30}Modo de depuración. (def: false)\n","-d --debug")
-        Console.WriteLine ("    {0,-30}Fuerza el uso de Unicode (UTF-16LE). (def: false)\n","-U --unicode")
-        Console.WriteLine ("    {0,-30}Fuerza el uso de UTF-8. (def: false) Procesador Intel® Core™2 Quad Q9400\n","-u --utf8")
+        Console.WriteLine ("    {0,-30}Usar la codificación indicada.\n","-e --encoding")
         Console.WriteLine ("    {0,-30}Muestra esta ayuda.\n","   --help")
         Console.WriteLine ("    {0,-30}Muestra la version.\n","   --version")
         Console.WriteLine ("    {0,-30}Senda del directorio principal/origen. (Obligatorio)\n","   master-path")
@@ -76,6 +75,12 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ("        {0, 2}: No se encontraron diferencias.", int ExitCode.DiferencesNotFound)
         Console.WriteLine ("        {0, 2}: Se encontraron diferencias.", int ExitCode.DiferencesFound)
         Console.WriteLine ""
+
+        Console.WriteLine "Encodings Disponibles:"
+        System.Text.Encoding.GetEncodings()
+        |> Array.iter (fun ei -> Console.WriteLine $"    {ei.Name,-12} {ei.DisplayName} ({ei.CodePage})")
+        Console.WriteLine ""
+
 
     showVersionHeader ()
 
@@ -113,9 +118,10 @@ let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFol
 // ---------------------------------------------------------------------------------------------------------------------
 let setEnconding (options: ArgumentOptions) =
 
-    if options.ForceUnicode then
-        Console.OutputEncoding <- System.Text.Encoding.Unicode
-
-    if options.ForceUtf8 then
-        Console.OutputEncoding <- System.Text.Encoding.UTF8
+    try
+        if options.Encoding <> "" then
+            Console.OutputEncoding <- System.Text.Encoding.GetEncoding options.Encoding
+    with
+    | _ -> Exception $"La codificación especificada no está soportada en esta plataforma: {options.Encoding}."
+           |> AggregateException |> raise
 // ---------------------------------------------------------------------------------------------------------------------
