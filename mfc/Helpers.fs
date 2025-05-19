@@ -64,7 +64,7 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ("    {0,-30}Modo de depuración. (def: false)\n","-d --debug")
         Console.WriteLine ("    {0,-30}Usar la codificación indicada.\n","-e --encoding")
         Console.WriteLine ("    {0,-30}Muestra esta ayuda.\n","   --help")
-        Console.WriteLine ("    {0,-30}Muestra la version.\n","   --version")
+        Console.WriteLine ("    {0,-30}Muestra la versión.\n","   --version")
         Console.WriteLine ("    {0,-30}Senda del directorio principal/origen. (Obligatorio)\n","   master-path")
         Console.WriteLine ("    {0,-30}Senda del directorio de backup. (Obligatorio)\n","   backup-path")
 
@@ -76,9 +76,9 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ("        {0, 2}: Se encontraron diferencias.", int ExitCode.DiferencesFound)
         Console.WriteLine ""
 
-        Console.WriteLine "Encodings Disponibles:"
+        Console.WriteLine "Codificaciones Disponibles:"
         System.Text.Encoding.GetEncodings()
-        |> Array.iter (fun ei -> Console.WriteLine $"    {ei.Name,-12} {ei.DisplayName} ({ei.CodePage})")
+        |> Array.iter (fun ei -> Console.WriteLine $"    {ei.Name,-14} {ei.DisplayName} ({ei.CodePage})")
         Console.WriteLine ""
 
 
@@ -110,6 +110,7 @@ let showDebugInfo (options: ArgumentOptions) (processedFiles: int) (processedFol
     Console.WriteLine $"Tareas: {options.SemaphoreSize}"
     Console.WriteLine $"Archivos procesados: {processedFiles:N0}"
     Console.WriteLine $"Carpetas procesadas: {processedFolders:N0}"
+    Console.WriteLine $"Codificación usada: {Console.OutputEncoding.EncodingName} ({Console.OutputEncoding.CodePage})"
     Console.WriteLine $"Tiempo transcurrido: {stopwatch.ElapsedMilliseconds:N0} ms"
     showExitCode exitCode
     Console.WriteLine ""
