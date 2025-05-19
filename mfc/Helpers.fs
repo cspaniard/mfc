@@ -56,38 +56,44 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ""
 
     let showHelp () =
-        let printArgumentLine (option: string) (description: string) =
-            Console.WriteLine($"    {{0,-30}}{description}\n", option)
 
-        let printExitCodeLine (code: ExitCode) (description: string) =
-            Console.WriteLine($"        {{0, 2}}: {description}", int code)
+        let printArgumentLines () =
+            let printArgumentLine (option: string) (description: string) =
+                Console.WriteLine($"    {{0,-30}}{description}\n", option)
 
-        Console.WriteLine "OPCIONES:"
-        Console.WriteLine ""
+            Console.WriteLine "OPCIONES:\n"
+            printArgumentLine "-s --separador" "Separador de campos. (def: \\t)"
+            printArgumentLine "-b --bloque-tamaño" "Tamaño en bytes de cada bloque de lectura. (def: 512000)"
+            printArgumentLine "-t --tareas" "Tareas máximas de lectura en paralelo. (def: 10)"
+            printArgumentLine "-d --debug" "Modo de depuración. (def: false)"
+            printArgumentLine "-e --encoding" "Usar la codificación indicada."
+            printArgumentLine "   --help" "Muestra esta ayuda."
+            printArgumentLine "   --version" "Muestra la versión."
+            printArgumentLine "   master-path" "Senda del directorio principal/origen. (Obligatorio)"
+            printArgumentLine "   backup-path" "Senda del directorio de backup. (Obligatorio)"
+            Console.WriteLine ""
 
-        printArgumentLine "-s --separador" "Separador de campos. (def: \\t)"
-        printArgumentLine "-b --bloque-tamaño" "Tamaño en bytes de cada bloque de lectura. (def: 512000)"
-        printArgumentLine "-t --tareas" "Tareas máximas de lectura en paralelo. (def: 10)"
-        printArgumentLine "-d --debug" "Modo de depuración. (def: false)"
-        printArgumentLine "-e --encoding" "Usar la codificación indicada."
-        printArgumentLine "   --help" "Muestra esta ayuda."
-        printArgumentLine "   --version" "Muestra la versión."
-        printArgumentLine "   master-path" "Senda del directorio principal/origen. (Obligatorio)"
-        printArgumentLine "   backup-path" "Senda del directorio de backup. (Obligatorio)"
+        let printExitCodeLines () =
+            let printExitCodeLine (code: ExitCode) (description: string) =
+                Console.WriteLine($"    {{0, 2}}: {description}", int code)
 
-        Console.WriteLine ""
-        Console.WriteLine "NOTAS:"
-        Console.WriteLine "    Se devuelven los siguientes códigos de salida:"
-        printExitCodeLine ExitCode.ErrorsFound "Se encontraron errores en el procesado."
-        printExitCodeLine ExitCode.DiferencesNotFound "No se encontraron diferencias."
-        printExitCodeLine ExitCode.DiferencesFound "Se encontraron diferencias."
-        Console.WriteLine ""
+            Console.WriteLine "Se devuelven los siguientes códigos de salida:"
+            printExitCodeLine ExitCode.ErrorsFound "Se encontraron errores en el procesado."
+            printExitCodeLine ExitCode.DiferencesNotFound "No se encontraron diferencias."
+            printExitCodeLine ExitCode.DiferencesFound "Se encontraron diferencias."
+            Console.WriteLine ""
 
-        Console.WriteLine "Codificaciones Disponibles:"
-        System.Text.Encoding.GetEncodings()
-        |> Array.iter (fun ei -> Console.WriteLine $"    {ei.Name,-14} {ei.DisplayName} ({ei.CodePage})")
-        Console.WriteLine ""
+        let printAvailableEncodings () =
+            Console.WriteLine "Codificaciones Disponibles:"
 
+            System.Text.Encoding.GetEncodings()
+            |> Array.iter (fun ei -> Console.WriteLine $"    {ei.Name,-14} {ei.DisplayName} ({ei.CodePage})")
+
+            Console.WriteLine ""
+
+        printArgumentLines ()
+        printExitCodeLines ()
+        printAvailableEncodings ()
 
     showVersionHeader ()
 
