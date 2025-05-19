@@ -56,24 +56,31 @@ let processParsingErrors (errors: Error seq) =
         Console.WriteLine ""
 
     let showHelp () =
+        let printArgumentLine (option: string) (description: string) =
+            Console.WriteLine($"    {{0,-30}}{description}\n", option)
+
+        let printExitCodeLine (code: ExitCode) (description: string) =
+            Console.WriteLine($"        {{0, 2}}: {description}", int code)
+
         Console.WriteLine "OPCIONES:"
         Console.WriteLine ""
-        Console.WriteLine ("    {0,-30}Separador de campos. (def: \\t)\n","-s --separador")
-        Console.WriteLine ("    {0,-30}Tamaño en bytes de cada bloque de lectura. (def: 512000)\n","-b --bloque-tamaño")
-        Console.WriteLine ("    {0,-30}Tareas máximas de lectura en paralelo. (def: 10)\n","-t --tareas")
-        Console.WriteLine ("    {0,-30}Modo de depuración. (def: false)\n","-d --debug")
-        Console.WriteLine ("    {0,-30}Usar la codificación indicada.\n","-e --encoding")
-        Console.WriteLine ("    {0,-30}Muestra esta ayuda.\n","   --help")
-        Console.WriteLine ("    {0,-30}Muestra la versión.\n","   --version")
-        Console.WriteLine ("    {0,-30}Senda del directorio principal/origen. (Obligatorio)\n","   master-path")
-        Console.WriteLine ("    {0,-30}Senda del directorio de backup. (Obligatorio)\n","   backup-path")
+
+        printArgumentLine "-s --separador" "Separador de campos. (def: \\t)"
+        printArgumentLine "-b --bloque-tamaño" "Tamaño en bytes de cada bloque de lectura. (def: 512000)"
+        printArgumentLine "-t --tareas" "Tareas máximas de lectura en paralelo. (def: 10)"
+        printArgumentLine "-d --debug" "Modo de depuración. (def: false)"
+        printArgumentLine "-e --encoding" "Usar la codificación indicada."
+        printArgumentLine "   --help" "Muestra esta ayuda."
+        printArgumentLine "   --version" "Muestra la versión."
+        printArgumentLine "   master-path" "Senda del directorio principal/origen. (Obligatorio)"
+        printArgumentLine "   backup-path" "Senda del directorio de backup. (Obligatorio)"
 
         Console.WriteLine ""
         Console.WriteLine "NOTAS:"
         Console.WriteLine "    Se devuelven los siguientes códigos de salida:"
-        Console.WriteLine ("        {0, 2}: Se encontraron errores en el procesado.", int ExitCode.ErrorsFound)
-        Console.WriteLine ("        {0, 2}: No se encontraron diferencias.", int ExitCode.DiferencesNotFound)
-        Console.WriteLine ("        {0, 2}: Se encontraron diferencias.", int ExitCode.DiferencesFound)
+        printExitCodeLine ExitCode.ErrorsFound "Se encontraron errores en el procesado."
+        printExitCodeLine ExitCode.DiferencesNotFound "No se encontraron diferencias."
+        printExitCodeLine ExitCode.DiferencesFound "Se encontraron diferencias."
         Console.WriteLine ""
 
         Console.WriteLine "Codificaciones Disponibles:"
